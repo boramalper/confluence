@@ -46,7 +46,7 @@ func (me *Handler) withTorrentContext(h func(w http.ResponseWriter, r *request))
 			q := r.URL.Query()
 			ms := q.Get("magnet")
 			if ms != "" {
-				m, err := metainfo.ParseMagnetURI(ms)
+				m, err := metainfo.ParseMagnetUri(ms)
 				if err != nil {
 					return metainfo.Hash{}, fmt.Errorf("parsing magnet: %w", err), nil
 				}
@@ -72,8 +72,13 @@ func (me *Handler) withTorrentContext(h func(w http.ResponseWriter, r *request))
 		if new {
 			mi := me.cachedMetaInfo(ih)
 			if mi != nil {
-				t.AddTrackers(mi.UpvertedAnnounceList())
 				t.SetInfoBytes(mi.InfoBytes)
+			}
+			if me.OnNewTorrent != nil {
+				me.OnNewTorrent(t, mi)
+			} else if mi != nil {
+				// Retain the old behaviour.
+				t.AddTrackers(mi.UpvertedAnnounceList())
 			}
 			go me.saveTorrentWhenGotInfo(t)
 		}

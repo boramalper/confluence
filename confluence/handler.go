@@ -7,6 +7,7 @@ import (
 
 	"github.com/anacrolix/missinggo/refclose"
 	"github.com/anacrolix/torrent"
+	"github.com/anacrolix/torrent/metainfo"
 )
 
 type Handler struct {
@@ -14,6 +15,8 @@ type Handler struct {
 	TorrentGrace     time.Duration
 	OnTorrentGrace   func(t *torrent.Torrent)
 	MetainfoCacheDir *string
+	// Called as soon as a new torrent is added, with the cached metainfo if it's found.
+	OnNewTorrent func(newTorrent *torrent.Torrent, cachedMetainfo *metainfo.MetaInfo)
 
 	mux         http.ServeMux
 	initMuxOnce sync.Once
